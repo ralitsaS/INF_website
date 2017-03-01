@@ -1,0 +1,131 @@
+<html>
+  <head>
+  
+  <link href="theme.css" rel="stylesheet">
+    <style>
+ #map {
+        
+        height: 500px;
+      }
+	  
+	  #iw_header {
+        color: black;
+		font-size: 18px;
+		width: 500px;
+      }
+	  
+	  #iw_stats {
+        color: black;
+		font-size: 14px;
+		margin-top: 10px;
+      }
+	  
+	  #iw_user {
+        color: black;
+		font-style: italic;
+		font-size: 12px;
+      }
+    </style>
+    <script src="https://maps.googleapis.com/maps/api/js?sensor=false&language=en&key=AIzaSyD69j-2UUGZJm5abmD3BC74OBwAbt_KzKc"></script>
+	<!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+    <!-- Include Bootstrap -->
+    <script type="text/javascript" src="naduhaise/js/bootstrap.min.js"></script>
+    <script type="text/javascript">
+      function load()
+	  {
+        var mapCanvas = document.getElementById('map');
+        var mapOptions = {
+          center: new google.maps.LatLng(42.0224879, 23.0947407),
+          zoom: 8,
+          mapTypeId: google.maps.MapTypeId.ROADMAP
+        }
+        var map = new google.maps.Map(mapCanvas, mapOptions)
+		
+		var infoWindow = new google.maps.InfoWindow;
+		
+		downloadUrl("toxml_NEW.php", function(data) {
+        var xml = data.responseXML;
+        var markers = xml.documentElement.getElementsByTagName("marker");
+        for (var i = 0; i < markers.length; i++) {
+          var name = markers[i].getAttribute("whole_name");
+		  var sp_kind=markers[i].getAttribute("sp_kind");
+		  var sex=markers[i].getAttribute("sex");
+		  var age=markers[i].getAttribute("age");
+		  var uploader=markers[i].getAttribute("uploaded_by");
+		  var comment=markers[i].getAttribute("description");
+		 // document.write(sp_kind);
+		  if(sp_kind=='Crustaceans') {
+          
+          var point = new google.maps.LatLng(
+              parseFloat(markers[i].getAttribute("lat")),
+              parseFloat(markers[i].getAttribute("lng")));
+          var html = "<div id=\"iw_header\"><b>" + name + "</b></div><br/><div id=\"iw_user\">Uploaded by: "+uploader+"</div></br><img src=\""+name+".jpg\" style=\"float: left;margin:10px;\" height=\"200\" width=\"200\" ><div id=\"iw_stats\">Class: " + sp_kind +"</br>Sex: " + sex +"</br> Age: "+age+"</br> User's comments: "+comment+"</div>";
+          
+          var marker = new google.maps.Marker({
+            map: map,
+            position: point,
+            icon: {
+      path: google.maps.SymbolPath.CIRCLE,
+      scale: 5
+            }
+          });
+		  
+          bindInfoWindow(marker, map, infoWindow, html);
+		  }
+        }
+      });
+	  
+	/*  google.maps.event.addListener(map, 'rightclick', function(event) {
+    var lat = event.latLng.lat();
+    var lng = event.latLng.lng();
+    // populate yor box/field with lat, lng
+	document.getElementById("textbox1").value = lat;
+    alert("Lat=" + lat + "; Lng=" + lng);
+}); */
+	  
+      }
+	  
+	  function bindInfoWindow(marker, map, infoWindow, html) {
+      google.maps.event.addListener(marker, 'click', function() {
+        infoWindow.setContent(html);
+        infoWindow.open(map, marker);
+      });
+    }
+	
+	
+	
+	function downloadUrl(url, callback) {
+      var request = window.ActiveXObject ?
+          new ActiveXObject('Microsoft.XMLHTTP') :
+          new XMLHttpRequest;
+
+      request.onreadystatechange = function() {
+        if (request.readyState == 4) {
+          request.onreadystatechange = doNothing;
+          callback(request, request.status);
+        }
+      };
+
+      request.open('GET', url, true);
+      request.send(null);
+    }
+	
+	function doNothing() {}
+	
+	
+      //google.maps.event.addDomListener(window, 'load', initialize);
+	  
+	  
+    </script>
+	
+	</head>
+  
+  
+   <body onload="load()">
+   <h1>Spotted Crustaceans</h1>
+   </br>
+   <div id="map"></div>
+   
+   </body>
+</html>
